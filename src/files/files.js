@@ -15,12 +15,13 @@ export const fileFilter = (req, file, cb) => {
 
 export const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "image/");
+    cb(null, "../images/");
   },
   filename: (req, file, cb) => {
     cb(null, Date.now() + extname(file.originalname));
   },
 });
+export const upload = multer({ storage: storage });
 
 export const get_image = (req, res) => {
   const filename = req.query.img;

@@ -26,10 +26,10 @@ export const upsert_product = async (req, res) => {
       usd_price,
       egp_price,
       brand_name,
-      image_url,
       total_qty,
       remaining_qty,
     } = req.body;
+    const imageUrl = `${req?.file?.filename}`;
     if (!id) {
       const { rows } = await pool.query(
         ` INSERT INTO public.products(
@@ -42,7 +42,7 @@ export const upsert_product = async (req, res) => {
           usd_price,
           egp_price,
           brand_name,
-          image_url,
+          imageUrl,
           total_qty,
           remaining_qty,
         ]
@@ -60,7 +60,7 @@ export const upsert_product = async (req, res) => {
           usd_price,
           egp_price,
           brand_name,
-          image_url,
+          imageUrl,
           total_qty,
           remaining_qty,
         ]

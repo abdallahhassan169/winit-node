@@ -17,8 +17,9 @@ export const login = async (req, res) => {
   if (user) {
     if (
       email === user.email &&
-      isPasswordMatch
-      // user type 1 is user and 2 is emp
+      isPasswordMatch &&
+      user.is_active
+      // user type 1 is user and 2 is admin
     ) {
       const token = jwt.sign(user, secret);
 
