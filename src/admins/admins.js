@@ -34,3 +34,19 @@ export const toggle_admin_status = async (req, res) => {
     res.send({ "error ": e });
   }
 };
+
+export const get_admins = async (req, res) => {
+  try {
+    const { query, limit, offset } = req.body;
+
+    const { rows } = await pool.query(
+      ` SELECT uid , id , name , email , mobile_no , is_active FROM public.users where user_type=2 and name like concat('%',cast($1 as text),'%') or email
+       like concat('%',cast($1 as text),'%')   limit ($2) offset ($3) `,
+      [query, limit, offset]
+    );
+    res.send(rows);
+  } catch (e) {
+    console.log(e);
+    res.send({ "error ": e });
+  }
+};
