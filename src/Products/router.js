@@ -4,5 +4,5 @@ import { upload } from "../files/files.js";
 export const ProductsRouter = express.Router();
 
 ProductsRouter.post("/get_products", get_products);
-ProductsRouter.post("/upsert_product", upload.single("images"), upsert_product);
+ProductsRouter.post("/upsert_product", upload.single("image"), upsert_product);
 ProductsRouter.post("/delete_product", delete_product);

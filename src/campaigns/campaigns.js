@@ -12,9 +12,8 @@ export const upsert_campaign = async (req, res) => {
       prize_url,
       remaining_qty,
     } = req.body;
-
+    const images = req.files;
     if (!id) {
-      // Insert new campaign
       const { rows } = await pool.query(
         `INSERT INTO public.campaigns(
           name, created_at, start_date, draw_date, is_deactivated, prize_name, prize_url, remaining_qty)
@@ -23,16 +22,25 @@ export const upsert_campaign = async (req, res) => {
           name,
           start_date,
           draw_date,
-          is_deactivated,
+          false,
           prize_name,
           prize_url,
           remaining_qty,
         ]
       );
+      const campaignId = rows[0].id;
 
+      if (images && images.length > 0) {
+        for (const image of images) {
+          await pool.query(
+            `INSERT INTO public.images(campaign_id, url , uploaded_at)
+            VALUES ($1, $2, current_timestamp );`,
+            [campaignId, `${image.filename}`]
+          );
+        }
+      }
       res.send({ message: "success", campaignId: rows[0].id });
     } else {
-      // Update existing campaign
       await pool.query(
         `UPDATE public.campaigns
         SET name=$2, start_date=$3, draw_date=$4, is_deactivated=$5, prize_name=$6, prize_url=$7, remaining_qty=$8

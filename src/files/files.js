@@ -15,7 +15,7 @@ export const fileFilter = (req, file, cb) => {
 
 export const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "../images/");
+    cb(null, "images/");
   },
   filename: (req, file, cb) => {
     cb(null, Date.now() + extname(file.originalname));
