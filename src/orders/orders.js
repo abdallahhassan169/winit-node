@@ -37,6 +37,7 @@ export const my_user_orders = async (req, res) => {
 };
 
 export const make_order = async (req, res) => {
+  const client = await pool.connect();
   try {
     const {
       is_donated,
@@ -44,7 +45,6 @@ export const make_order = async (req, res) => {
       ordered_by_uid,
       status,
       products,
-      campaign_id,
       user_id,
     } = req.body;
 
@@ -54,7 +54,9 @@ export const make_order = async (req, res) => {
         .json({ message: "Please select some products first." });
     }
 
-    const orderResult = await pool.query(
+    await client.query("BEGIN");
+
+    const orderResult = await client.query(
       `INSERT INTO public.orders(created_at, is_donated, address_id, ordered_by_uid, status)
        VALUES ($1, $2, $3, $4, $5)
        RETURNING id`,
@@ -64,33 +66,42 @@ export const make_order = async (req, res) => {
     const orderId = orderResult.rows[0].id;
 
     if (!orderId) {
-      return res
-        .status(500)
-        .json({ message: "An error occurred while creating the order." });
+      throw new Error("Failed to create order.");
     }
 
     await Promise.all(
       products.map(async (product) => {
-        await pool.query(
+        const campaign_id = product.campaign_id;
+        await client.query(
           `INSERT INTO public.orders_products(order_id, product_id, qty, status)
              VALUES ($1, $2, $3, 1);`,
           [orderId, product?.id, product.qty]
         );
-        await pool.query(
+
+        await client.query(
           `INSERT INTO public.tickets(campaign_id, created_at, is_winner, user_id, order_id, product_id)
              VALUES ($1, current_timestamp, false, $2, $3, $4);`,
           [campaign_id, user_id, orderId, product?.id]
         );
-        await pool.query(
+        await client.query(
           `UPDATE public.products SET remaining_qty = remaining_qty - $1 WHERE id = $2;`,
           [product.qty, product?.id]
+        );
+        await client.query(
+          `UPDATE public.campaigns SET remaining_qty = remaining_qty - $1 WHERE id = $2;`,
+          [product.qty, campaign_id]
         );
       })
     );
 
+    await client.query("COMMIT"); // Commit transaction
+
     res.status(200).json({ message: "Order created successfully.", orderId });
   } catch (error) {
+    await client.query("ROLLBACK"); // Rollback transaction
     console.error("Error making order:", error);
     res.status(500).json({ error: "An internal server error occurred." });
+  } finally {
+    client.release(); // Release the client back to the pool
   }
 };
