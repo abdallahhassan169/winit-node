@@ -107,7 +107,7 @@ JOIN
 	
 ON 
     c.product_id = p.id 
-	join images i on c.id = i.campaign_id    where p.name like concat('%',cast($1 as text),'%') or p.brand_name like concat('%',cast($1 as text),'%') or
+	left join images i on c.id = i.campaign_id    where p.name like concat('%',cast($1 as text),'%') or p.brand_name like concat('%',cast($1 as text),'%') or
        p.description like concat('%',cast($1 as text),'%') and c.is_deactivated is not true and c.draw_date > current_date GROUP BY p.id, c.id limit ($2) offset ($3)  `,
       [query, limit, offset]
     );
