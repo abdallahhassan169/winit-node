@@ -89,7 +89,7 @@ export const delete_product = async (req, res) => {
   }
 };
 
-export const campaing_products = async (req, res) => {
+export const campaign_products = async (req, res) => {
   try {
     const { query, limit, offset } = req.body;
 
