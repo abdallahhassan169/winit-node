@@ -11,13 +11,15 @@ export const upsert_campaign = async (req, res) => {
       prize_name,
       prize_url,
       remaining_qty,
+      product_id,
     } = req.body;
+
     const images = req.files;
     if (!id) {
       const { rows } = await pool.query(
         `INSERT INTO public.campaigns(
-          name, created_at, start_date, draw_date, is_deactivated, prize_name, prize_url, remaining_qty)
-        VALUES ($1, NOW(), $2, $3, $4, $5, $6, $7) RETURNING id;`,
+          name, created_at, start_date, draw_date, is_deactivated, prize_name, prize_url, remaining_qty , product_id)
+        VALUES ($1, NOW(), $2, $3, $4, $5, $6, $7 , $8) RETURNING id;`,
         [
           name,
           start_date,
@@ -26,6 +28,7 @@ export const upsert_campaign = async (req, res) => {
           prize_name,
           prize_url,
           remaining_qty,
+          product_id,
         ]
       );
       const campaignId = rows[0].id;
