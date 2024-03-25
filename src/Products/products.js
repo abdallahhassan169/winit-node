@@ -88,3 +88,32 @@ export const delete_product = async (req, res) => {
     res.send({ "error ": e });
   }
 };
+
+export const campaing_products = async (req, res) => {
+  try {
+    const { query, limit, offset } = req.body;
+
+    const { rows } = await pool.query(
+      `  SELECT 
+    json_build_object(
+        'product' ,   p.*  ,
+        'campaign',   c.* ,
+		    'images',i.*
+    ) AS full_data
+FROM 
+    campaigns c 
+JOIN 
+    products p 
+	
+ON 
+    c.product_id = p.id 
+	join images i on c.id = i.campaign_id    where p.name like concat('%',cast($1 as text),'%') or p.brand_name like concat('%',cast($1 as text),'%') or
+       p.description like concat('%',cast($1 as text),'%') limit ($2) offset ($3) `,
+      [query, limit, offset]
+    );
+    res.send(rows);
+  } catch (e) {
+    console.log(e);
+    res.send({ "error ": e });
+  }
+};
