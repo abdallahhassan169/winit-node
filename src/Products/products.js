@@ -98,7 +98,7 @@ export const campaing_products = async (req, res) => {
     json_build_object(
         'product' ,   p.*  ,
         'campaign',   c.* ,
-		    'images',i.*
+		    'images', json_agg(i.*)
     ) AS full_data
 FROM 
     campaigns c 
@@ -108,7 +108,7 @@ JOIN
 ON 
     c.product_id = p.id 
 	join images i on c.id = i.campaign_id    where p.name like concat('%',cast($1 as text),'%') or p.brand_name like concat('%',cast($1 as text),'%') or
-       p.description like concat('%',cast($1 as text),'%') and c.is_deactivated is not true and c.draw_date > current_date limit ($2) offset ($3) `,
+       p.description like concat('%',cast($1 as text),'%') and c.is_deactivated is not true and c.draw_date > current_date GROUP BY p.id, c.id limit ($2) offset ($3)  `,
       [query, limit, offset]
     );
     res.send(rows);

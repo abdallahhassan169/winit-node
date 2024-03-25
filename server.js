@@ -9,6 +9,7 @@ import { AdminRouter } from "./src/admins/router.js";
 import { CampRouter } from "./src/campaigns/router.js";
 import { OrderRouter } from "./src/orders/router.js";
 import { ImageRouter } from "./src/files/router.js";
+import { userRouter } from "./src/users/router.js";
 
 const app = express();
 
@@ -24,4 +25,5 @@ app.use(AdminRouter);
 app.use(CampRouter);
 app.use(OrderRouter);
 app.use(ImageRouter);
+app.use(userRouter);
 app.listen(port, () => console.log("server up"));
