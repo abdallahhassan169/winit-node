@@ -92,7 +92,7 @@ export const delete_product = async (req, res) => {
 export const campaign_products = async (req, res) => {
   try {
     const { query, limit, offset, ids } = req.body;
-
+    console.log(ids);
     const { rows } = await pool.query(
       `  SELECT 
     json_build_object(
@@ -107,13 +107,15 @@ JOIN
 ON 
     c.product_id = p.id 
 	left join images i on c.id = i.campaign_id  where ($4::int [] is null or c.id = any($4::int []))
-   and p.name like concat('%',cast($1 as text),'%')
+   and( p.name like concat('%',cast($1 as text),'%')
     or p.brand_name like concat('%',cast($1 as text),'%')
-     or p.description like concat('%',cast($1 as text),'%')
+     or p.description like concat('%',cast($1 as text),'%'))
       and c.is_deactivated is not true and c.draw_date > current_date GROUP BY p.id, c.id
        limit ($2) offset ($3)  `,
       [query, limit, offset, ids]
     );
+    // ($4::int [] is null or c.id = any($4::int []))
+
     res.send(rows);
   } catch (e) {
     console.log(e);
