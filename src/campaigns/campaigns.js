@@ -12,14 +12,16 @@ export const upsert_campaign = async (req, res) => {
       prize_url,
       remaining_qty,
       product_id,
+      target,
+      note,
     } = req.body;
 
     const images = req.files;
     if (!id) {
       const { rows } = await pool.query(
         `INSERT INTO public.campaigns(
-          name, created_at, start_date, draw_date, is_deactivated, prize_name, prize_url, remaining_qty , product_id)
-        VALUES ($1, NOW(), $2, $3, $4, $5, $6, $7 , $8) RETURNING id;`,
+          name, created_at, start_date, draw_date, is_deactivated, prize_name, prize_url, remaining_qty , product_id , target, note)
+        VALUES ($1, NOW(), $2, $3, $4, $5, $6, $7 , $8 , $9 , $10) RETURNING id;`,
         [
           name,
           start_date,
@@ -29,6 +31,8 @@ export const upsert_campaign = async (req, res) => {
           prize_url,
           remaining_qty,
           product_id,
+          target,
+          note,
         ]
       );
       const campaignId = rows[0].id;
@@ -46,7 +50,7 @@ export const upsert_campaign = async (req, res) => {
     } else {
       await pool.query(
         `UPDATE public.campaigns
-        SET name=$2, start_date=$3, draw_date=$4, is_deactivated=$5, prize_name=$6, prize_url=$7, remaining_qty=$8
+        SET name=$2, start_date=$3, draw_date=$4, is_deactivated=$5, prize_name=$6, prize_url=$7, remaining_qty=$8 , product_id=$9 , target =$10 , note =$11
         WHERE id = $1;`,
         [
           id,
@@ -57,6 +61,9 @@ export const upsert_campaign = async (req, res) => {
           prize_name,
           prize_url,
           remaining_qty,
+          product_id,
+          target,
+          note,
         ]
       );
 
