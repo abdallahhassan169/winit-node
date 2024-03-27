@@ -94,23 +94,27 @@ export const campaign_products = async (req, res) => {
     const { query, limit, offset, ids } = req.body;
     console.log(ids);
     const { rows } = await pool.query(
-      `  SELECT 
+      `  SELECT
     json_build_object(
         'product' ,   p.*  ,
         'campaign',   c.* ,
-		    'images', json_agg(i.*)
+		    'images', json_agg(i.*),
+        'winner',u.*
+        
     ) AS full_data
-FROM 
-    campaigns c 
-JOIN 
-    products p 
-ON 
-    c.product_id = p.id 
+FROM
+    campaigns c
+JOIN
+    products p
+ON
+    c.product_id = p.id
+ left join tickets t on t.campaign_id = c.id and t.is_winner = true
+ left join users u on u.uid = t.user_id
 	left join images i on c.id = i.campaign_id  where ($4::int [] is null or c.id = any($4::int []))
    and( p.name like concat('%',cast($1 as text),'%')
     or p.brand_name like concat('%',cast($1 as text),'%')
      or p.description like concat('%',cast($1 as text),'%'))
-      and c.is_deactivated is not true and c.draw_date > current_date GROUP BY p.id, c.id
+      and c.is_deactivated is not true and c.draw_date > current_date GROUP BY p.id, c.id , u.*
        limit ($2) offset ($3)  `,
       [query, limit, offset, ids]
     );
