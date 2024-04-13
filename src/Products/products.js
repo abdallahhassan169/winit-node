@@ -119,8 +119,17 @@ ON
       [query, limit, offset, ids]
     );
     // ($4::int [] is null or c.id = any($4::int []))
-
-    res.send(rows);
+    const finishd_have_winner = rows.filter((x) => x.full_data.winner);
+    const finsihed_no_winner = rows.filter(
+      (x) =>
+        x?.full_data.campaign?.remaining_qty === 0 &&
+        x.full_data.winner === null
+    );
+    const available = rows.filter(
+      (x) =>
+        x?.full_data.campaign?.remaining_qty > 0 && x.full_data.winner === null
+    );
+    res.send({ finishd_have_winner, finsihed_no_winner, available, rows });
   } catch (e) {
     console.log(e);
     res.send({ "error ": e });
