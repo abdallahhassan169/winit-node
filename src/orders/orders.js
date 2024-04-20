@@ -4,9 +4,9 @@ export const admin_orders = async (req, res) => {
   try {
     const { query, limit, offset, from_date } = req.body;
     const { rows } = await pool.query(
-      ` SELECT o.* , u.name , u.email FROM public.orders o join users u on on ordered_by_uid = u.uid
+      ` SELECT o.* , u.name , u.email FROM public.orders o join users u  on ordered_by_uid = u.uid
       where name like concat('%',cast($1 as text),'%')  
-       and (cast($4 as date) is null or start_date > cast($4 as date)) and email like concat('%',cast($1 as text),'%') 
+       and (cast($4 as date) is null or o.created_at >= cast($4 as date)) and email like concat('%',cast($1 as text),'%') 
         limit ($2) offset ($3)
        
        `,
@@ -14,6 +14,7 @@ export const admin_orders = async (req, res) => {
     );
     res.send(rows);
   } catch (e) {
+    console.log(e);
     res.status(400).send({ error: e });
   }
 };

@@ -14,6 +14,7 @@ import multer from "multer";
 import { upsert_product } from "./src/Products/products.js";
 import { extname } from "path";
 import { upsert_campaign } from "./src/campaigns/campaigns.js";
+import { add_assets } from "./src/files/files.js";
 
 const app = express();
 
@@ -32,6 +33,15 @@ export const upload = multer({ storage: storage });
 app.use("/uploads", express.static("uploads"));
 app.post("/upsert_product", upload.single("image"), upsert_product);
 app.post("/upsert_campaign", upload.array("images"), upsert_campaign);
+app.post(
+  "/add_assets",
+  upload.fields([
+    { name: "banner", maxCount: 1 },
+    { name: "image_1", maxCount: 1 },
+    { name: "image_2", maxCount: 1 },
+  ]),
+  add_assets
+);
 app.use(AuthRouter);
 app.use(ProductsRouter);
 app.use(AdressRouter);

@@ -2,12 +2,12 @@ import pool from "../config.js";
 
 export const get_products = async (req, res) => {
   try {
-    const { query, limit, offset } = req.body;
-
+    const { query, limit, offset, id } = req.body;
+    console.log(id);
     const { rows } = await pool.query(
-      ` SELECT * FROM public.products where name like concat('%',cast($1 as text),'%') or brand_name like concat('%',cast($1 as text),'%') or
-       description like concat('%',cast($1 as text),'%') limit ($2) offset ($3) `,
-      [query, limit, offset]
+      ` SELECT * FROM public.products where (name like concat('%',cast($1 as text),'%') or brand_name like concat('%',cast($1 as text),'%') or
+       description like concat('%',cast($1 as text),'%')) and (cast($4 as int) is null or id = cast($4 as int)) limit ($2) offset ($3) `,
+      [query, limit, offset, id]
     );
     res.send(rows);
   } catch (e) {
@@ -94,28 +94,34 @@ export const campaign_products = async (req, res) => {
     const { query, limit, offset, ids } = req.body;
     console.log(ids);
     const { rows } = await pool.query(
-      `  SELECT
+      ` SELECT
     json_build_object(
-        'product' ,   p.*  ,
-        'campaign',   c.* ,
-		    'images', json_agg(i.*),
-        'winner',u.*
-        
+        'product', p.*,
+        'campaign', c.*,
+        'images', json_agg(i.*),
+        'winner', u.*
     ) AS full_data
 FROM
     campaigns c
 JOIN
-    products p
-ON
-    c.product_id = p.id
- left join tickets t on t.campaign_id = c.id and t.is_winner = true
- left join users u on u.uid = t.user_id
-	left join images i on c.id = i.campaign_id  where ($4::int [] is null or c.id = any($4::int []))
-   and( p.name like concat('%',cast($1 as text),'%')
-    or p.brand_name like concat('%',cast($1 as text),'%')
-     or p.description like concat('%',cast($1 as text),'%'))
-      and c.is_deactivated is not true and c.draw_date > current_date GROUP BY p.id, c.id , u.*
-       limit ($2) offset ($3)  `,
+    products p ON c.product_id = p.id
+LEFT JOIN
+    tickets t ON t.campaign_id = c.id AND t.is_winner = true
+LEFT JOIN
+    users u ON u.uid = t.user_id
+LEFT JOIN
+    images i ON c.id = i.campaign_id
+WHERE
+    ($4::int[] IS NULL OR c.id = ANY($4::int[])) AND
+  (  (p.name LIKE CONCAT('%', CAST($1 AS TEXT), '%'))
+     or
+    (c.name LIKE CONCAT('%', CAST($1 AS TEXT), '%')))
+GROUP BY
+    p.id, c.id, u.uid
+LIMIT
+    ($2)
+OFFSET
+    ($3); `,
       [query, limit, offset, ids]
     );
     // ($4::int [] is null or c.id = any($4::int []))

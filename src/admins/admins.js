@@ -13,10 +13,10 @@ export const register_admin = async (req, res) => {
 	VALUES ( ($1), ($2)  , ($3),current_timestamp ,($4),2 ,($5) ); `,
       [d.user_name, d.email, hashedPassword, d.phone, uuid]
     );
-    res.send({ message: "registered succefully" });
+    res.status(200).send({ message: "registered succefully" });
   } catch (e) {
     console.log(e);
-    res.send({ "error ": e });
+    res.status(500).send({ "error ": e });
   }
 };
 
