@@ -15,6 +15,7 @@ import { upsert_product } from "./src/Products/products.js";
 import { extname } from "path";
 import { upsert_campaign } from "./src/campaigns/campaigns.js";
 import { add_assets } from "./src/files/files.js";
+import { statistics } from "./src/statistics/router.js";
 
 const app = express();
 
@@ -49,4 +50,5 @@ app.use(CampRouter);
 app.use(OrderRouter);
 app.use(ImageRouter);
 app.use(userRouter);
+app.use(statistics);
 app.listen(port, () => console.log("server up"));
