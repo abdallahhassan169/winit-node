@@ -36,9 +36,8 @@ app.post("/upsert_campaign", upload.array("images"), upsert_campaign);
 app.post(
   "/add_assets",
   upload.fields([
-    { name: "banner", maxCount: 1 },
-    { name: "image_1", maxCount: 1 },
-    { name: "image_2", maxCount: 1 },
+    { name: "banner", maxCount: 1 }, // Handle single file upload with field name 'banner'
+    { name: "images", maxCount: 10 }, // Handle array of files upload with field name 'images' (up to 10 files)
   ]),
   add_assets
 );

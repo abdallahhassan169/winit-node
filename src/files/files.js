@@ -24,25 +24,57 @@ export const storage = multer.diskStorage({
 export const upload = multer({ storage: storage });
 
 export const add_assets = async (req, res) => {
+  const client = await pool.connect();
+
   try {
-    const { banner, image_1, image_2 } = req.body;
-    console.log(req.body);
-    const { rows } = await pool.query(
-      `  INSERT INTO public.public_assets(
-	  banner, image_1, image_2)
-	VALUES ( $1, $2, $3); `,
-      [banner, image_1, image_2]
+    await client.query("BEGIN");
+
+    const { banner, images } = req.files;
+    console.log(images, "ll");
+    const bannerInsertResult = await client.query(
+      `INSERT INTO banners (banner) VALUES ($1) RETURNING id`,
+      [banner[0].filename]
     );
-    if (rows.length === 0) {
-      throw new Error("Failed to insert into database please add one.");
-    }
+    const bannerId = bannerInsertResult.rows[0].id;
+
+    await Promise.all(
+      images.map(async (image) => {
+        await client.query(
+          `INSERT INTO slides (url, banner_id) VALUES ($1, $2)`,
+          [image.filename, bannerId]
+        );
+      })
+    );
+
+    await client.query("COMMIT");
+
     res.send({ message: "success" });
+  } catch (e) {
+    await client.query("ROLLBACK");
+    console.error("Error in add_assets endpoint:", e);
+    res.status(500).json({ error: "Internal server error" });
+  } finally {
+    client.release();
+  }
+};
+export const banners = async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      ` SELECT
+    json_build_object(
+        'banner',b.*,
+        'slides', json_agg(s.*)
+    ) AS full_data
+FROM banners b join slides s on b.id = s.banner_id  group by   b.id  order by b.id desc limit 1
+    `
+    );
+
+    res.send({ rows });
   } catch (e) {
     console.log(e);
     res.send({ "error ": e });
   }
 };
-
 export const get_image = (req, res) => {
   const filename = req.query.img;
   console.log(req.params, "params");
