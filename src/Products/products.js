@@ -50,7 +50,7 @@ export const upsert_product = async (req, res) => {
     } else {
       const { rows } = await pool.query(
         ` UPDATE public.products
-	SET   name=$2, description=$3, category=$4, usd_price=$5, egp_price=$6, brand_name=$7, image_url=$8, total_qty=$9, remaining_qty=$10
+	SET   name=$2, description=$3, category=$4, usd_price=$5, egp_price=$6, brand_name=$7, image_url=COALESCE($8 ,image_url) , total_qty=$9, remaining_qty=$10
 	WHERE id = $1 `,
         [
           id,

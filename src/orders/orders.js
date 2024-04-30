@@ -19,6 +19,30 @@ export const admin_orders = async (req, res) => {
   }
 };
 
+export const order_by_id = async (req, res) => {
+  try {
+    const { id } = req.body;
+    const { rows } = await pool.query(
+      ` SELECT
+    json_build_object(
+        'products',json_agg(p.*),
+        'user', u.*,
+        'order', o.*
+    ) AS full_data
+from orders o left join orders_products
+op on o.id = op.order_id left join users u
+ on o.ordered_by_uid = u.uid left join products p on p.id = op.product_id
+       where o.id = $1 group by o.id  , u.*
+       `,
+      [id]
+    );
+    res.send(rows);
+  } catch (e) {
+    console.log(e);
+    res.status(400).send({ error: e });
+  }
+};
+
 export const my_user_orders = async (req, res) => {
   try {
     const { query, limit, offset, from_date, user_id } = req.body;
@@ -104,5 +128,20 @@ export const make_order = async (req, res) => {
     res.status(500).json({ error: "An internal server error occurred." });
   } finally {
     client.release(); // Release the client back to the pool
+  }
+};
+
+export const change_order_status = async (req, res) => {
+  try {
+    const { status, id } = req.body;
+    const { rows } = await pool.query(
+      ` update orders set status = $1 where id = $2
+       
+       `,
+      [status, id]
+    );
+    res.send(rows);
+  } catch (e) {
+    res.status(400).send({ error: e });
   }
 };
