@@ -16,6 +16,7 @@ import { extname } from "path";
 import { upsert_campaign } from "./src/campaigns/campaigns.js";
 import { add_assets } from "./src/files/files.js";
 import { statistics } from "./src/statistics/router.js";
+import authMiddleware, { authorized } from "./src/auth/MiddleWare.js";
 
 const app = express();
 
@@ -31,6 +32,8 @@ export const storage = multer.diskStorage({
   },
 });
 export const upload = multer({ storage: storage });
+app.use(authMiddleware);
+app.use(authorized);
 app.use("/uploads", express.static("uploads"));
 app.post("/upsert_product", upload.single("image"), upsert_product);
 app.post("/upsert_campaign", upload.array("images"), upsert_campaign);
@@ -51,4 +54,4 @@ app.use(OrderRouter);
 app.use(ImageRouter);
 app.use(userRouter);
 app.use(statistics);
-app.listen(port, () => console.log("server up"));
+app.listen(port, () => console.log("server up on port :" + port));

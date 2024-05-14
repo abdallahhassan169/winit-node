@@ -1,6 +1,6 @@
 // authMiddleware.js
 import jwt from "jsonwebtoken";
-import pool, { secret } from "../../config.js";
+import pool, { secret } from "../../src/config.js";
 const authMiddleware = (req, res, next) => {
   const token = req.headers.authorization;
   const route = req.path;
@@ -8,9 +8,8 @@ const authMiddleware = (req, res, next) => {
   if (
     route === "/login" ||
     route === "/image" ||
-    route === "/get_cities" ||
-    route === "/register" ||
-    route === "/upsert_guest_complain"
+    route === "/campaign_products" ||
+    route === "/register"
   ) {
     next();
     return;
@@ -32,21 +31,36 @@ const authMiddleware = (req, res, next) => {
   });
 };
 
+const public_urls = [
+  "/make_order",
+  "/user_tickets",
+  "/login",
+  "/image",
+  "/campaign_products",
+  "/register",
+];
+const user_urls = ["/make_order", "/user_tickets"];
 export const authorized = async (req, res, next) => {
   const user = jwt.decode(req.headers.authorization);
   console.log(user);
   const user_id = user?.id;
   const type = user?.user_type;
   const route = req.path;
-  console.log(type);
-  const all_routes = await pool.query(
-    `select su.url from public.admins_pages ap join system_urls su on ap.page_id = su.id  where admin_id =($1)  `,
-    [user_id]
+  console.log(
+    type,
+    route,
+    typeof route,
+    user_urls.includes(route),
+    type === "1",
+    "herrrrre"
   );
-
-  if (all_routes?.rows.map((r) => r.url).includes(route) || type === "1") {
+  if (public_urls.includes(route)) {
     next();
-  } else res.send("you are not authorized to this service");
+  } else if (user_urls.includes(route) && type === "1") {
+    next();
+  } else if (type === "2") {
+    next();
+  } else res.status(500).send("you are not authorized to this url");
 };
 
 export default authMiddleware;
