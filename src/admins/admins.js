@@ -4,6 +4,7 @@ import pool from "../config.js";
 import { v4 as uuidv4 } from "uuid";
 export const register_admin = async (req, res) => {
   try {
+    console.log(req.body);
     const d = req.body;
     const hashedPassword = await bcrypt.hash(d.password, saltRounds);
     const uuid = uuidv4();
@@ -11,7 +12,7 @@ export const register_admin = async (req, res) => {
       ` INSERT INTO public.users(
 	 name, email, password_hash, created_at, mobile_no, user_type,uid)
 	VALUES ( ($1), ($2)  , ($3),current_timestamp ,($4),2 ,($5) ); `,
-      [d.user_name, d.email, hashedPassword, d.phone, uuid]
+      [d.name, d.email, hashedPassword, d.phone, uuid]
     );
     res.status(200).send({ message: "registered succefully" });
   } catch (e) {
