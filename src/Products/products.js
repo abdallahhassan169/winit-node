@@ -6,7 +6,7 @@ export const get_products = async (req, res) => {
     console.log(id);
     const { rows } = await pool.query(
       ` SELECT * FROM public.products where (name like concat('%',cast($1 as text),'%') or brand_name like concat('%',cast($1 as text),'%') or
-       description like concat('%',cast($1 as text),'%')) and (cast($4 as int) is null or id = cast($4 as int)) limit ($2) offset ($3) `,
+       description like concat('%',cast($1 as text),'%')) and (cast($4 as int) is null or id = cast($4 as int)) order by id limit ($2) offset ($3) `,
       [query, limit, offset, id]
     );
     res.send(rows);

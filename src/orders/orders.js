@@ -23,16 +23,22 @@ export const order_by_id = async (req, res) => {
   try {
     const { id } = req.body;
     const { rows } = await pool.query(
-      ` SELECT
+      `  SELECT
     json_build_object(
         'products',json_agg(p.*),
-        'user', u.*,
-        'order', o.*
+        'user',( u.*),
+        'order', o.*,
+        'address',a.*,
+        'status',s.*
     ) AS full_data
 from orders o left join orders_products
 op on o.id = op.order_id left join users u
  on o.ordered_by_uid = u.uid left join products p on p.id = op.product_id
-       where o.id = $1 group by o.id  , u.*
+ left join addresses a on a.id = o.address_id
+ join order_status s on s.id = o.status
+       where o.id = $1
+       
+       group by u.* , o.*,a.*,s.* 
        `,
       [id]
     );
@@ -54,6 +60,19 @@ export const my_user_orders = async (req, res) => {
        
        `,
       [limit, offset, user_id]
+    );
+    res.send(rows);
+  } catch (e) {
+    res.status(400).send({ error: e });
+  }
+};
+
+export const get_order_status = async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      ` select * from order_status
+       
+       `
     );
     res.send(rows);
   } catch (e) {
