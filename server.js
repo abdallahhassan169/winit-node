@@ -32,8 +32,8 @@ export const storage = multer.diskStorage({
   },
 });
 export const upload = multer({ storage: storage });
-//app.use(authMiddleware);
-//app.use(authorized);
+app.use(authMiddleware);
+app.use(authorized);
 app.use("/uploads", express.static("uploads"));
 app.post("/upsert_product", upload.single("image"), upsert_product);
 app.post("/upsert_campaign", upload.array("images"), upsert_campaign);

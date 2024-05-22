@@ -104,7 +104,7 @@ export const make_order = async (req, res) => {
       `INSERT INTO public.orders(created_at, is_donated, address_id, ordered_by_uid, status)
        VALUES ($1, $2, $3, $4, $5)
        RETURNING id`,
-      [new Date(), is_donated, address_id, ordered_by_uid, status]
+      [new Date(), is_donated, address_id, req.user.uid, status]
     );
 
     const orderId = orderResult.rows[0].id;

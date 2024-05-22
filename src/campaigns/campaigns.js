@@ -106,7 +106,7 @@ export const delete_campaign = async (req, res) => {
     const { id } = req.body;
 
     const { rows } = await pool.query(
-      `  DELETE FROM public.campaigns
+      `  update public.campaigns set is_deactivated = not is_deactivated
 	WHERE id = $1 `,
       [id]
     );
