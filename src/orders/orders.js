@@ -7,7 +7,7 @@ export const admin_orders = async (req, res) => {
       ` SELECT o.* , u.name , u.email FROM public.orders o join users u  on ordered_by_uid = u.uid
       where name like concat('%',cast($1 as text),'%')  
        and (cast($4 as date) is null or o.created_at >= cast($4 as date)) and email like concat('%',cast($1 as text),'%') 
-        limit ($2) offset ($3) order by id desc
+     order by id desc   limit ($2) offset ($3) 
        
        `,
       [query, limit, offset, from_date]
