@@ -30,6 +30,7 @@ export const upsert_product = async (req, res) => {
       remaining_qty,
     } = req.body;
     const imageUrl = `${req?.file?.filename}`;
+    console.log(req.file, "joihnbkubkubkv h");
     if (!id) {
       const { rows } = await pool.query(
         ` INSERT INTO public.products(
