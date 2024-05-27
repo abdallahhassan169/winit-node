@@ -122,8 +122,14 @@ export const get_admin_campaigns = async (req, res) => {
     const { query, limit, offset, from_date } = req.body;
     console.log(query, "qqq");
     const { rows } = await pool.query(
-      ` SELECT c.*,p.name as product FROM public.campaigns c
-      join products  p on p.id = c.product_id 
+      ` SELECT c.*, p.name AS product , winners.id as winner
+FROM public.campaigns c
+left JOIN (
+    SELECT *
+    FROM public.tickets t
+    WHERE t.is_winner = true
+) winners ON winners.campaign_id = c.id
+JOIN public.products p ON p.id = c.product_id
       where (c.name like concat('%',cast($1 as text),'%')  or p.name like concat('%',cast($1 as text),'%'))
        and (cast($4 as date) is null or c.start_date > cast($4 as date)) order by c.id
         limit ($2) offset ($3)
