@@ -38,6 +38,7 @@ const public_urls = [
   "/image",
   "/campaign_products",
   "/register",
+  "banner",
 ];
 const user_urls = ["/make_order", "/user_tickets"];
 export const authorized = async (req, res, next) => {
