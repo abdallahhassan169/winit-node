@@ -58,7 +58,7 @@ export const authorized = async (req, res, next) => {
     next();
   } else if (user_urls.includes(route) && type === "1") {
     next();
-  } else if (type === "2") {
+  } else if (type === "2" && user.is_active) {
     next();
   } else res.status(500).send("you are not authorized to this url");
 };

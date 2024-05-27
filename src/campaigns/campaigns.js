@@ -106,11 +106,11 @@ export const delete_campaign = async (req, res) => {
     const { id } = req.body;
 
     const { rows } = await pool.query(
-      `  update public.campaigns set is_deactivated = not is_deactivated
+      `  update public.campaigns set is_deactivated = coalesce(not is_deactivated, true)
 	WHERE id = $1 `,
       [id]
     );
-    res.send({ message: "success" });
+    res.send({ message: "success", rows });
   } catch (e) {
     console.log(e);
     res.send({ "error ": e });
