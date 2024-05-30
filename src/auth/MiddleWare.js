@@ -1,16 +1,21 @@
 // authMiddleware.js
 import jwt from "jsonwebtoken";
 import pool, { secret } from "../../src/config.js";
+const public_urls = [
+  // "/make_order",
+  "/user_tickets",
+  "/login",
+  "/image",
+  "/campaign_products",
+  "/register",
+  "/banners",
+];
+const user_urls = ["/make_order", "/user_tickets"];
 const authMiddleware = (req, res, next) => {
   const token = req.headers.authorization;
   const route = req.path;
   console.log(route);
-  if (
-    route === "/login" ||
-    route === "/image" ||
-    route === "/campaign_products" ||
-    route === "/register"
-  ) {
+  if (public_urls.includes(route)) {
     next();
     return;
   }
@@ -31,16 +36,6 @@ const authMiddleware = (req, res, next) => {
   });
 };
 
-const public_urls = [
-  "/make_order",
-  "/user_tickets",
-  "/login",
-  "/image",
-  "/campaign_products",
-  "/register",
-  "/banners",
-];
-const user_urls = ["/make_order", "/user_tickets"];
 export const authorized = async (req, res, next) => {
   const user = jwt.decode(req.headers.authorization);
   console.log(user);

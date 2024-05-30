@@ -112,7 +112,7 @@ LEFT JOIN
     users u ON u.uid = t.user_id
 LEFT JOIN
     images i ON c.id = i.campaign_id
-WHERE
+WHERE c.is_deactivated is not true and
     ($4::int[] IS NULL OR c.id = ANY($4::int[])) AND
   (  (p.name LIKE CONCAT('%', CAST($1 AS TEXT), '%'))
      or
