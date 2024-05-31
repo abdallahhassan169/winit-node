@@ -29,19 +29,14 @@ export const add_assets = async (req, res) => {
   try {
     await client.query("BEGIN");
 
-    const { banner, images } = req.files;
-    console.log(images, "ll");
-    const bannerInsertResult = await client.query(
-      `INSERT INTO banners (banner) VALUES ($1) RETURNING id`,
-      [banner[0].filename]
-    );
-    const bannerId = bannerInsertResult.rows[0].id;
+    const { images } = req.files;
+    const { type } = req.body;
 
     await Promise.all(
       images.map(async (image) => {
         await client.query(
-          `INSERT INTO slides (url, banner_id) VALUES ($1, $2)`,
-          [image.filename, bannerId]
+          `INSERT INTO banners (banner, type) VALUES ($1, $2)`,
+          [image.filename, type]
         );
       })
     );
@@ -55,6 +50,40 @@ export const add_assets = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   } finally {
     client.release();
+  }
+};
+export const delete_asset = async (req, res) => {
+  const client = await pool.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    const { id } = req.body;
+
+    await client.query(`delete from banners where id = $1`, [id]);
+
+    await client.query("COMMIT");
+
+    res.send({ message: "success" });
+  } catch (e) {
+    await client.query("ROLLBACK");
+    console.error("Error in add_assets endpoint:", e);
+    res.status(500).json({ error: "Internal server error" });
+  } finally {
+    client.release();
+  }
+};
+export const dash_banners = async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      ` select * from banners order by id desc
+    `
+    );
+
+    res.send(rows);
+  } catch (e) {
+    console.log(e);
+    res.send({ "error ": e });
   }
 };
 export const banners = async (req, res) => {
