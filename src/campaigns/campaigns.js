@@ -163,3 +163,20 @@ export const get_user_campaigns = async (req, res) => {
     res.send({ "error ": e });
   }
 };
+
+export const get_campaign_tickets = async (req, res) => {
+  try {
+    const { id } = req.body;
+
+    const { rows } = await pool.query(
+      ` SELECT t.* , u.mobile_no as phone FROM public.tickets t join users u on u.uid = t.user_id  where campaign_id = $1
+       
+       `,
+      [id]
+    );
+    res.send(rows);
+  } catch (e) {
+    console.log(e);
+    res.send({ "error ": e });
+  }
+};
