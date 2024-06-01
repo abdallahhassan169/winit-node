@@ -89,16 +89,13 @@ export const dash_banners = async (req, res) => {
 export const banners = async (req, res) => {
   try {
     const { rows } = await pool.query(
-      ` SELECT
-    json_build_object(
-        'banner',b.*,
-        'slides', json_agg(s.*)
-    ) AS full_data
-FROM banners b join slides s on b.id = s.banner_id  group by   b.id  order by b.id desc limit 1
+      ` select * from banners order by id desc
     `
     );
+    const banners = rows.filter((banner) => banner.type === "banners");
+    const slides = rows.filter((banner) => banner.type === "slides");
 
-    res.send({ rows });
+    res.send({ banners, slides });
   } catch (e) {
     console.log(e);
     res.send({ "error ": e });
