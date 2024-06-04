@@ -10,7 +10,7 @@ const public_urls = [
   "/register",
   "/banners",
 ];
-const user_urls = ["/make_order", "/user_tickets","/add_address"];
+const user_urls = ["/make_order", "/user_tickets","/add_address","/get_user_addresses"];
 const authMiddleware = (req, res, next) => {
   const token = req.headers.authorization;
   const route = req.path;
