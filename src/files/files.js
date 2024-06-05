@@ -15,7 +15,7 @@ export const fileFilter = (req, file, cb) => {
 
 export const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "../../images/");
+    cb(null, "/var/data/images");
   },
   filename: (req, file, cb) => {
     cb(null, Date.now() + extname(file.originalname));
@@ -105,7 +105,7 @@ export const get_image = (req, res) => {
   const filename = req.query.img;
   console.log(req.params, "params");
   try {
-    res.sendFile(`${process.cwd()}/images/${filename}`);
+    res.sendFile(`/var/data/images`);
   } catch (e) {
     res.status(500).send({ err: e.message });
   }
