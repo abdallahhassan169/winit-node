@@ -1,6 +1,7 @@
 import multer from "multer";
 import { extname } from "path";
 import pool from "../config.js";
+import fs from "fs";
 export const fileFilter = (req, file, cb) => {
   const allowedTypes = ["image/jpeg", "image/png", "image/jpg"];
   if (allowedTypes.includes(file.mimetype)) {
@@ -12,7 +13,13 @@ export const fileFilter = (req, file, cb) => {
     );
   }
 };
+const IMAGE_DIR = "/var/data/images";
 
+// Ensure the directory exists
+if (!fs.existsSync(IMAGE_DIR)) {
+  fs.mkdirSync(IMAGE_DIR, { recursive: true });
+  console.log("not found");
+}
 export const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, "/var/data/images");
