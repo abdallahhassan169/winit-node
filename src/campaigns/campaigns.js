@@ -8,6 +8,7 @@ export const upsert_campaign = async (req, res) => {
     const {
       id,
       name,
+      name_en,
       start_date,
       draw_date,
       is_deactivated,
@@ -23,10 +24,11 @@ export const upsert_campaign = async (req, res) => {
     if (!id) {
       const { rows } = await client.query(
         `INSERT INTO public.campaigns(
-          name, created_at, start_date, draw_date, is_deactivated, prize_name, prize_url, remaining_qty , product_id , target, note)
-        VALUES ($1, NOW(), $2, $3, $4, $5, $6, $7 , $8 , $9 , $10) RETURNING id;`,
+          name, name_en, created_at, start_date, draw_date, is_deactivated, prize_name, prize_url, remaining_qty, product_id, target, note)
+        VALUES ($1, $2, NOW(), $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id;`,
         [
           name,
+          name_en,
           start_date,
           draw_date,
           false,
@@ -44,8 +46,8 @@ export const upsert_campaign = async (req, res) => {
         for (const image of images) {
           console.log(image.path);
           await client.query(
-            `INSERT INTO public.images(campaign_id, url , uploaded_at)
-            VALUES ($1, $2, current_timestamp );`,
+            `INSERT INTO public.images(campaign_id, url, uploaded_at)
+            VALUES ($1, $2, current_timestamp);`,
             [campaignId, `${image.filename}`]
           );
         }
@@ -56,11 +58,12 @@ export const upsert_campaign = async (req, res) => {
       // Update campaign information
       await client.query(
         `UPDATE public.campaigns
-        SET name=$2, start_date=$3, draw_date=$4, is_deactivated=$5, prize_name=$6, prize_url=$7, remaining_qty=COALESCE($8 ,remaining_qty ), product_id=$9 , target =$10 , note =$11
+        SET name=$2, name_en=$3, start_date=$4, draw_date=$5, is_deactivated=$6, prize_name=$7, prize_url=$8, remaining_qty=COALESCE($9, remaining_qty), product_id=$10, target=$11, note=$12
         WHERE id = $1;`,
         [
           id,
           name,
+          name_en,
           start_date,
           draw_date,
           is_deactivated,
@@ -83,10 +86,9 @@ export const upsert_campaign = async (req, res) => {
         );
         for (const image of images) {
           console.log(image.path);
-
           await client.query(
-            `INSERT INTO public.images(campaign_id, url , uploaded_at)
-            VALUES ($1, $2, current_timestamp );`,
+            `INSERT INTO public.images(campaign_id, url, uploaded_at)
+            VALUES ($1, $2, current_timestamp);`,
             [id, `${image.filename}`]
           );
         }

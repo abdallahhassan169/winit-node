@@ -21,6 +21,7 @@ export const upsert_product = async (req, res) => {
     const {
       id,
       name,
+      name_en,
       description,
       category,
       usd_price,
@@ -29,15 +30,17 @@ export const upsert_product = async (req, res) => {
       total_qty,
       remaining_qty,
     } = req.body;
-    const imageUrl = `${req?.file?.filename}`;
-    console.log(req.file, "joihnbkubkubkv h");
+    const imageUrl = req?.file?.filename || null;
+    console.log(req.file, "File information");
+
     if (!id) {
       const { rows } = await pool.query(
-        ` INSERT INTO public.products(
-	  name, description, category, usd_price, egp_price, brand_name, image_url, total_qty, remaining_qty)
-	VALUES (  $1, $2, $3, $4, $5, $6, $7, $8, $9); `,
+        `INSERT INTO public.products(
+          name, name_en, description, category, usd_price, egp_price, brand_name, image_url, total_qty, remaining_qty)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);`,
         [
           name,
+          name_en,
           description,
           category,
           usd_price,
@@ -50,12 +53,13 @@ export const upsert_product = async (req, res) => {
       );
     } else {
       const { rows } = await pool.query(
-        ` UPDATE public.products
-	SET   name=$2, description=$3, category=$4, usd_price=$5, egp_price=$6, brand_name=$7, image_url=COALESCE($8 ,image_url) , total_qty=$9, remaining_qty=$10
-	WHERE id = $1 `,
+        `UPDATE public.products
+        SET name=$2, name_en=$3, description=$4, category=$5, usd_price=$6, egp_price=$7, brand_name=$8, image_url=COALESCE($9, image_url), total_qty=$10, remaining_qty=$11
+        WHERE id=$1;`,
         [
           id,
           name,
+          name_en,
           description,
           category,
           usd_price,
@@ -69,8 +73,8 @@ export const upsert_product = async (req, res) => {
     }
     res.send({ message: "success" });
   } catch (e) {
-    console.log(e);
-    res.send({ "error ": e });
+    console.error(e);
+    res.status(500).send({ error: e.message });
   }
 };
 

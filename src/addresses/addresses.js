@@ -2,17 +2,9 @@ import pool from "../config.js";
 
 export const insert_address = async (req, res) => {
   try {
-    const {
-      apart_no,
-      floor_no,
-      building_no,
-      street,
-      area,
-      city,
-      country,
-      uid,
-    } = req.body;
-
+    const { apart_no, floor_no, building_no, street, area, city, country } =
+      req.body;
+    const { uid } = req.user;
     const { rows } = await pool.query(
       `INSERT INTO public.addresses(
         apart_no, floor_no, building_no, street, area, city, country, uid, created_at)
@@ -29,7 +21,7 @@ export const insert_address = async (req, res) => {
 
 export const get_user_addresses = async (req, res) => {
   try {
-    const { uid } = req?.body;
+    const { uid } = req?.user;
 
     const { rows } = await pool.query(
       `select * from addresses where uid = $1`,
