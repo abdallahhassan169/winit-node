@@ -22,7 +22,7 @@ if (!fs.existsSync(IMAGE_DIR)) {
 }
 export const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "/var/data/images");
+    cb(null, "/var/data/images1");
   },
   filename: (req, file, cb) => {
     cb(null, Date.now() + extname(file.originalname));
