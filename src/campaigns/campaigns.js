@@ -42,6 +42,7 @@ export const upsert_campaign = async (req, res) => {
 
       if (images && images.length > 0) {
         for (const image of images) {
+          console.log(image.path);
           await client.query(
             `INSERT INTO public.images(campaign_id, url , uploaded_at)
             VALUES ($1, $2, current_timestamp );`,
