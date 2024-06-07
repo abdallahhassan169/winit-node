@@ -103,9 +103,9 @@ export const banners = async (req, res) => {
 };
 export const get_image = (req, res) => {
   const filename = req.query.img;
-  console.log(req.params, "params");
+  console.log(req.params, "params", process.cwd(), "current");
   try {
-    res.sendFile(`${process.cwd()}/var/data/images/${filename}`);
+    res.sendFile(`/var/data/images1`);
   } catch (e) {
     res.status(500).send({ err: e.message });
   }
