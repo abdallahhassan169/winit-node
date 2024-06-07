@@ -24,7 +24,7 @@ app.use(cors({ origin: "*" }));
 app.use(bodyParser.json());
 export const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "./images/"); // Destination folder for uploaded files
+    cb(null, "/var/data/images"); // Destination folder for uploaded files
   },
   filename: (req, file, cb) => {
     // Use the current timestamp as the filename
