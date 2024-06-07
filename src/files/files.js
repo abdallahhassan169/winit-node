@@ -105,7 +105,7 @@ export const get_image = (req, res) => {
   const filename = req.query.img;
   console.log(req.params, "params");
   try {
-    res.sendFile(`/var/data/images`);
+    res.sendFile(`/var/data/images/${filename}`);
   } catch (e) {
     res.status(500).send({ err: e.message });
   }
