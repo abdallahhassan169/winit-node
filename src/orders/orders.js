@@ -51,7 +51,8 @@ op on o.id = op.order_id left join users u
 
 export const my_user_orders = async (req, res) => {
   try {
-    const { query, limit, offset, from_date, user_id } = req.body;
+    const { query, limit, offset, from_date } = req.body;
+    const user_id = req.user.uid;
     const { rows } = await pool.query(
       ` SELECT o.* , u.name , u.email FROM public.orders o join users u on on ordered_by_uid = u.uid
       where  u.uid = ($3) order by created_at desc
@@ -104,7 +105,7 @@ export const make_order = async (req, res) => {
       `INSERT INTO public.orders(created_at, is_donated, address_id, ordered_by_uid, status)
        VALUES ($1, $2, $3, $4, $5)
        RETURNING id`,
-      [new Date(), is_donated, address_id, req.user.uid, status]
+      [new Date(), false, address_id, req.user.uid, 1]
     );
 
     const orderId = orderResult.rows[0].id;
