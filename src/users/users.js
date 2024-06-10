@@ -2,7 +2,8 @@ import pool from "../config.js";
 
 export const my_user_tickets = async (req, res) => {
   try {
-    const { limit, offset, user_id } = req.body;
+    const { limit, offset } = req.body;
+    const user_id = req.user.id;
     const { rows } = await pool.query(
       ` select t.*  , c.id as campaign_number , c.name as campaign_name
  from tickets t
