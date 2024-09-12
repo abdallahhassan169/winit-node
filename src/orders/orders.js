@@ -1,5 +1,5 @@
 import pool from "../config.js";
-
+import crypto from "crypto";
 export const admin_orders = async (req, res) => {
   try {
     const { query, limit, offset, from_date } = req.body;
@@ -80,20 +80,36 @@ export const get_order_status = async (req, res) => {
     res.status(400).send({ error: e });
   }
 };
+export const pay_ver = (req, res) => {
+  const hmac = req.headers["hmac"];
+  const payload = JSON.stringify(req.body);
+  const hash = crypto
+    .createHmac(
+      "sha512",
+      "ZXlKaGJHY2lPaUpJVXpVeE1pSXNJblI1Y0NJNklrcFhWQ0o5LmV5SmpiR0Z6Y3lJNklrMWxjbU5vWVc1MElpd2ljSEp2Wm1sc1pWOXdheUk2T1RjNU1USTBMQ0p1WVcxbElqb2lhVzVwZEdsaGJDSjkuc1lpdGNnOXFWclF1Ry1Eb1B0LXVfQmhpSVFjRmRwcWRaeEczc2t1c3dlaWRhWFZhbnViTzBPcElPNnUxNnUxMmkyZzRhLU1jVkZxMGlwcldVaU1QNEE="
+    )
+    .update(payload)
+    .digest("hex");
 
+  if (hash === hmac) {
+    const { obj } = req.body;
+
+    if (obj.success && obj.pending) {
+      processPaymentSuccess(obj);
+      res.status(200).send("Webhook received");
+    } else {
+      res.status(200).send("Payment not successful");
+    }
+  } else {
+    res.status(403).send("Invalid HMAC");
+  }
+};
 export const make_order = async (req, res) => {
   const client = await pool.connect();
   try {
-    const {
-      is_donated,
-      address_id,
-      ordered_by_uid,
-      status,
-      products,
-      user_id,
-    } = req.body;
+    const { address_id, items } = req.body;
 
-    if (!products) {
+    if (!items) {
       return res
         .status(400)
         .json({ message: "Please select some products first." });
@@ -115,26 +131,35 @@ export const make_order = async (req, res) => {
     }
 
     await Promise.all(
-      products.map(async (product) => {
-        const campaign_id = product.campaign_id;
+      items.map(async (campaign) => {
+        const { rows } = await client.query(
+          `select * from campaigns where id = $1`,
+          [campaign.id]
+        );
+        if (rows[0].remaining_qty - campaign.qty < 0) {
+          throw new Error(
+            `the quantity is less than quantity in your order please check remaining quantity of campaign (${rows[0].name})`
+          );
+        }
+        const product_id = rows[0].product_id;
         await client.query(
           `INSERT INTO public.orders_products(order_id, product_id, qty, status)
              VALUES ($1, $2, $3, 1);`,
-          [orderId, product?.id, product.qty]
+          [orderId, product_id, campaign.qty]
         );
 
         await client.query(
           `INSERT INTO public.tickets(campaign_id, created_at, is_winner, user_id, order_id, product_id)
              VALUES ($1, current_timestamp, false, $2, $3, $4);`,
-          [campaign_id, user_id, orderId, product?.id]
+          [campaign.id, req.user.uid, orderId, product_id]
         );
         await client.query(
           `UPDATE public.products SET remaining_qty = remaining_qty - $1 WHERE id = $2;`,
-          [product.qty, product?.id]
+          [campaign.qty, product_id]
         );
         await client.query(
           `UPDATE public.campaigns SET remaining_qty = remaining_qty - $1 WHERE id = $2;`,
-          [product.qty, campaign_id]
+          [campaign.qty, campaign.id]
         );
       })
     );
@@ -144,8 +169,8 @@ export const make_order = async (req, res) => {
     res.status(200).json({ message: "Order created successfully.", orderId });
   } catch (error) {
     await client.query("ROLLBACK"); // Rollback transaction
-    console.error("Error making order:", error);
-    res.status(500).json({ error: "An internal server error occurred." });
+    console.error("Error making order:", error.message);
+    res.status(500).send({ error: String(error.message) });
   } finally {
     client.release(); // Release the client back to the pool
   }

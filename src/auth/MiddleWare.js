@@ -3,14 +3,19 @@ import jwt from "jsonwebtoken";
 import pool, { secret } from "../../src/config.js";
 const public_urls = [
   // "/make_order",
-  "/user_tickets",
+
   "/login",
   "/image",
   "/campaign_products",
   "/register",
   "/banners",
 ];
-const user_urls = ["/make_order", "/user_tickets","/add_address","/get_user_addresses"];
+const user_urls = [
+  "/make_order",
+  "/user_tickets",
+  "/add_address",
+  "/get_user_addresses",
+];
 const authMiddleware = (req, res, next) => {
   const token = req.headers.authorization;
   const route = req.path;

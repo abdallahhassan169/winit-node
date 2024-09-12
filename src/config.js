@@ -1,9 +1,10 @@
 import pg from "pg";
 const pool = new pg.Pool({
   user: "abdallah",
-  host: "dpg-cp1olu6ct0pc73d5htng-a.oregon-postgres.render.com",
-  database: "winit",
-  password: "0KivliVIHGpPsbu9ElJMa3fqIPScBuM4",
+  host: "dpg-crhf9glsvqrc738d4lg0-a.oregon-postgres.render.com",
+
+  database: "winit_l90n",
+  password: "ZU9k4milObMXWy3RT9ozwZXkvvzkqRLC",
   port: 5432,
   max: 20, // Adjust as needed
   idleTimeoutMillis: 30000, // Adjust as needed
@@ -16,4 +17,4 @@ const pool = new pg.Pool({
 export const secret = "J3mlt0WzyktgiyXiRff5ua883P9t7jM2";
 export const saltRounds = 10;
 export default pool;
-export const port = 3001;
+export const port = 3008;

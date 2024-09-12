@@ -30,6 +30,6 @@ export const login = async (req, res) => {
       res.status(401).json({ message: "Authentication failed." });
     }
   } catch (e) {
-    res.status(500).send({ err: e });
+    res.status(500).send({ err: e.message });
   }
 };
