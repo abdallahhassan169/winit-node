@@ -37,14 +37,7 @@ app.use(authorized);
 app.use("/uploads", express.static("uploads"));
 app.post("/upsert_product", upload.single("image"), upsert_product);
 app.post("/upsert_campaign", upload.array("images"), upsert_campaign);
-app.post(
-  "/add_assets",
-  upload.fields([
-    { name: "banner", maxCount: 1 }, // Handle single file upload with field name 'banner'
-    { name: "images", maxCount: 10 }, // Handle array of files upload with field name 'images' (up to 10 files)
-  ]),
-  add_assets
-);
+app.post("/add_assets", upload.array("images"), add_assets);
 app.use(AuthRouter);
 app.use(ProductsRouter);
 app.use(AdressRouter);

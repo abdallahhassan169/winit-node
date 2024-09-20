@@ -28,9 +28,13 @@ export const add_assets = async (req, res) => {
 
   try {
     await client.query("BEGIN");
+    console.log("Files received:", req.files);
 
-    const { images } = req.files;
+    const images = req.files; // Access files using field name 'images'
     const { type } = req.body;
+    if (!images || images.length === 0) {
+      return res.status(400).json({ error: "No images uploaded" });
+    }
 
     await Promise.all(
       images.map(async (image) => {
@@ -52,6 +56,7 @@ export const add_assets = async (req, res) => {
     client.release();
   }
 };
+
 export const delete_asset = async (req, res) => {
   const client = await pool.connect();
 
