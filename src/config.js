@@ -15,7 +15,7 @@ const pool = new pg.Pool({
     rejectUnauthorized: process.env.DB_SSL_REJECT_UNAUTHORIZED === "true",
   },
 });
-
+export const tokenExpiry = process.env.tokenExpiry;
 export const secret = process.env.SECRET;
 export const saltRounds = parseInt(process.env.SALT_ROUNDS, 10);
 export const port = parseInt(process.env.PORT, 10);

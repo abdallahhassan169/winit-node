@@ -47,7 +47,14 @@ export const authorized = async (req, res, next) => {
   const user_id = user?.id;
   const type = user?.user_type;
   const route = req.path;
-
+  console.log(
+    type,
+    route,
+    typeof route,
+    user_urls.includes(route),
+    type === "1",
+    "herrrrre"
+  );
   if (public_urls.includes(route)) {
     next();
   } else if (user_urls.includes(route) && type === "1") {

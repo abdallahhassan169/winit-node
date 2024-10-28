@@ -1,4 +1,4 @@
-import pool from "../config.js";
+import pool, { tokenExpiry } from "../config.js";
 import jwt from "jsonwebtoken";
 import { secret } from "../config.js";
 import bcrypt from "bcrypt";
@@ -24,7 +24,7 @@ export const login = async (req, res) => {
         user.is_active
         // user type 1 is user and 2 is admin
       ) {
-        const token = jwt.sign(user, secret);
+        const token = jwt.sign(user, secret, { expiresIn: tokenExpiry });
 
         res.json({ token: token });
       } else res.status(401).send({ message: "Authentication failed." });
