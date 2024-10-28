@@ -2,11 +2,13 @@ import pool from "../config.js";
 import jwt from "jsonwebtoken";
 import { secret } from "../config.js";
 import bcrypt from "bcrypt";
+import { loginSchema } from "./validation.js";
 
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-
+    const { error } = loginSchema.validate({ email, password });
+    if (error) throw new Error(error);
     const rows = await pool.query(
       `select * from "public".users where email = ($1)   `,
       [email]

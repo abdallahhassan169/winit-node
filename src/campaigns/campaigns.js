@@ -1,9 +1,13 @@
 import pool from "../config.js";
+import { campaignSchema } from "./validation.js";
 
 export const upsert_campaign = async (req, res) => {
   const client = await pool.connect();
   try {
-    await client.query("BEGIN"); // Start transaction
+    const { error } = campaignSchema.validate(req.body, { abortEarly: false });
+    if (error) throw new Error(error);
+
+    if (error) await client.query("BEGIN");
 
     const {
       id,
@@ -19,8 +23,9 @@ export const upsert_campaign = async (req, res) => {
       target,
       note,
     } = req.body;
-    console.log(req.body);
+
     const images = req.files;
+
     if (!id) {
       const { rows } = await client.query(
         `INSERT INTO public.campaigns(
@@ -40,22 +45,22 @@ export const upsert_campaign = async (req, res) => {
           note,
         ]
       );
+
       const campaignId = rows[0].id;
 
       if (images && images.length > 0) {
         for (const image of images) {
-          console.log(image.path);
           await client.query(
             `INSERT INTO public.images(campaign_id, url, uploaded_at)
             VALUES ($1, $2, current_timestamp);`,
-            [campaignId, `${image.filename}`]
+            [campaignId, image.filename]
           );
         }
       }
-      await client.query("COMMIT"); // Commit transaction
+
+      await client.query("COMMIT");
       res.send({ message: "success", campaignId: rows[0].id });
     } else {
-      // Update campaign information
       await client.query(
         `UPDATE public.campaigns
         SET name=$2, name_en=$3, start_date=$4, draw_date=$5, is_deactivated=$6, prize_name=$7, prize_url=$8, remaining_qty=COALESCE($9, remaining_qty), product_id=$10, target=$11, note=$12
@@ -76,33 +81,29 @@ export const upsert_campaign = async (req, res) => {
         ]
       );
 
-      // Insert new images
       if (images && images.length > 0) {
-        // Delete old images
         await client.query(
-          `DELETE FROM public.images
-        WHERE campaign_id = $1;`,
+          `DELETE FROM public.images WHERE campaign_id = $1;`,
           [id]
         );
+
         for (const image of images) {
-          console.log(image.path);
           await client.query(
             `INSERT INTO public.images(campaign_id, url, uploaded_at)
             VALUES ($1, $2, current_timestamp);`,
-            [id, `${image.filename}`]
+            [id, image.filename]
           );
         }
       }
 
-      await client.query("COMMIT"); // Commit transaction
+      await client.query("COMMIT");
       res.send({ message: "success" });
     }
   } catch (e) {
-    await client.query("ROLLBACK"); // Rollback transaction on error
-    console.error(e);
+    await client.query("ROLLBACK");
     res.status(500).send({ error: e.message });
   } finally {
-    client.release(); // Release client back to the pool
+    client.release();
   }
 };
 

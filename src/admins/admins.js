@@ -2,22 +2,26 @@ import { saltRounds } from "../config.js";
 import bcrypt from "bcrypt";
 import pool from "../config.js";
 import { v4 as uuidv4 } from "uuid";
+import { adminSchema } from "./validation.js";
 export const register_admin = async (req, res) => {
   try {
     console.log(req.body);
-    const d = req.body;
-    const hashedPassword = await bcrypt.hash(d.password, saltRounds);
+    const { name, email, phone, password } = req.body;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
     const uuid = uuidv4();
+    const { error } = adminSchema.validate({ name, email, phone, password });
+    if (error) throw new Error(error);
+
     const { rows } = await pool.query(
       ` INSERT INTO public.users(
 	 name, email, password_hash, created_at, mobile_no, user_type,uid)
 	VALUES ( ($1), ($2)  , ($3),current_timestamp ,($4),2 ,($5) ); `,
-      [d.name, d.email, hashedPassword, d.phone, uuid]
+      [name, email, hashedPassword, phone, uuid]
     );
     res.status(200).send({ message: "registered succefully" });
   } catch (e) {
     console.log(e);
-    res.status(500).send({ "error ": e });
+    res.status(500).send({ "error ": e.message });
   }
 };
 function generateRandomNumber() {
@@ -37,7 +41,7 @@ export const resetPassword = async (req, res) => {
     res.status(200).send({ message: "changed succefully", new_password });
   } catch (e) {
     console.log(e);
-    res.status(500).send({ "error ": e });
+    res.status(500).send({ "error ": e.message });
   }
 };
 export const toggle_admin_status = async (req, res) => {
@@ -51,7 +55,7 @@ export const toggle_admin_status = async (req, res) => {
     res.send({ message: "toggled succefully" });
   } catch (e) {
     console.log(e);
-    res.send({ "error ": e });
+    res.send({ "error ": e.message });
   }
 };
 
@@ -67,6 +71,6 @@ export const get_admins = async (req, res) => {
     res.send(rows);
   } catch (e) {
     console.log(e);
-    res.send({ "error ": e });
+    res.send({ "error ": e.message });
   }
 };

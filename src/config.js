@@ -1,20 +1,22 @@
 import pg from "pg";
-const pool = new pg.Pool({
-  user: "abdallah",
-  host: "dpg-crhf9glsvqrc738d4lg0-a.oregon-postgres.render.com",
+import dotenv from "dotenv";
 
-  database: "winit_l90n",
-  password: "ZU9k4milObMXWy3RT9ozwZXkvvzkqRLC",
-  port: 5432,
-  max: 20, // Adjust as needed
-  idleTimeoutMillis: 30000, // Adjust as needed
+dotenv.config();
+
+const pool = new pg.Pool({
+  user: process.env.DB_USER,
+  host: process.env.DB_HOST,
+  database: process.env.DB_DATABASE,
+  password: process.env.DB_PASSWORD,
+  port: parseInt(process.env.DB_PORT, 10),
+  max: parseInt(process.env.DB_MAX, 10),
+  idleTimeoutMillis: parseInt(process.env.DB_IDLE_TIMEOUT, 10),
   ssl: {
-    // These options are often required for connecting to a remote PostgreSQL server
-    // Adjust them based on your server's configuration
-    rejectUnauthorized: false,
+    rejectUnauthorized: process.env.DB_SSL_REJECT_UNAUTHORIZED === "true",
   },
 });
-export const secret = "J3mlt0WzyktgiyXiRff5ua883P9t7jM2";
-export const saltRounds = 10;
+
+export const secret = process.env.SECRET;
+export const saltRounds = parseInt(process.env.SALT_ROUNDS, 10);
+export const port = parseInt(process.env.PORT, 10);
 export default pool;
-export const port = 3008;

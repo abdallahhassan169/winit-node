@@ -1,5 +1,6 @@
 import pool from "../config.js";
 import crypto from "crypto";
+import { orderSchema } from "./validation.js";
 export const admin_orders = async (req, res) => {
   try {
     const { query, limit, offset, from_date } = req.body;
@@ -108,7 +109,8 @@ export const make_order = async (req, res) => {
   const client = await pool.connect();
   try {
     const { address_id, items } = req.body;
-
+    const { error } = orderSchema.validate(req.body, { abortEarly: false });
+    if (error) throw new Error(error);
     if (!items) {
       return res
         .status(400)
@@ -170,7 +172,7 @@ export const make_order = async (req, res) => {
   } catch (error) {
     await client.query("ROLLBACK"); // Rollback transaction
     console.error("Error making order:", error.message);
-    res.status(500).send({ error: String(error.message) });
+    res.status(500).send({ error: error.message });
   } finally {
     client.release(); // Release the client back to the pool
   }

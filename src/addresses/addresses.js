@@ -1,10 +1,22 @@
 import pool from "../config.js";
+import { adresseSchema } from "./validation.js";
 
 export const insert_address = async (req, res) => {
   try {
     const { apart_no, floor_no, building_no, street, area, city, country } =
       req.body;
     const { uid } = req.user;
+    const { error } = adresseSchema.validate({
+      apart_no,
+      floor_no,
+      building_no,
+      street,
+      area,
+      city,
+      country,
+    });
+
+    if (error) throw new Error(error);
     const { rows } = await pool.query(
       `INSERT INTO public.addresses(
         apart_no, floor_no, building_no, street, area, city, country, uid, created_at)
