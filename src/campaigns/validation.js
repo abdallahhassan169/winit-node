@@ -16,7 +16,7 @@ export const campaignSchema = Joi.object({
     .label("Draw Date"),
   is_deactivated: Joi.boolean().optional().label("Is Deactivated"),
   prize_name: Joi.string().min(3).max(255).required().label("Prize Name"),
-  prize_url: Joi.string().uri().optional().label("Prize URL"),
+  prize_url: Joi.string().optional().label("Prize URL"),
   remaining_qty: Joi.number()
     .integer()
     .min(0)
